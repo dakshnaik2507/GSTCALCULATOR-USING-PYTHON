@@ -1,0 +1,71 @@
+import os
+from tkinter import *
+from tkinter.messagebox import *
+from datetime import datetime
+
+def get_next_filename():
+    bill_files = [f for f in os.listdir() if f.startswith("bill_") and f.endswith(".txt")]
+    max_number = 0
+    for bill in bill_files:
+        try:
+            number = int(bill.split('_')[1].split('.')[0])
+            max_number = max(max_number, number)
+        except ValueError:
+            continue
+    
+    next_number = max_number + 1
+    return f"bill_{next_number:03d}.txt" 
+
+def save():
+    product_name = ent_name.get()
+    product_price = ent_price.get()
+    gst = ent_gst.get()
+
+    try:
+        gst_amount = (float(product_price) * float(gst)) / 100
+        final_price = float(product_price) + gst_amount				
+        
+        bill = (
+            f"Generated On: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
+	    f"Product Name: {product_name}\n"
+            f"Base Price: ₹{product_price}\n"
+            f"Final Price: ₹{final_price:.2f}\n"
+            "------------------------------\n"
+        )
+  
+        filename = get_next_filename()
+        with open(filename, "w", encoding="utf-8") as file:
+            file.write(bill)
+        
+        showinfo("Success","Bill generated")
+        
+        ent_name.delete(0, END)
+        ent_price.delete(0, END)
+        ent_gst.delete(0, END)
+        ent_name.focus()
+    except Exception as e:
+        showerror("Issue", e)
+
+
+root = Tk()
+root.title("GST Calculator")
+root.geometry("800x700+300+50")
+f = ("arial", 20, "bold")
+
+lab_name = Label(root, text="Enter Product Name", font=f)
+ent_name = Entry(root, font=f)
+lab_price = Label(root, text="Enter Product Base Price", font=f)
+ent_price = Entry(root, font=f)
+lab_gst = Label(root, text="Enter GST %", font=f)
+ent_gst = Entry(root, font=f)
+btn_generate = Button(root, text="Generate Bill", font=f, command=save)
+
+lab_name.pack(pady=10)
+ent_name.pack(pady=10)
+lab_price.pack(pady=10)
+ent_price.pack(pady=10)
+lab_gst.pack(pady=10)
+ent_gst.pack(pady=10)
+btn_generate.pack(pady=10)
+
+root.mainloop()
